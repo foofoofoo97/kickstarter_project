@@ -33,6 +33,7 @@ class CampaignIndex extends Component {
             <Icon name="ethereum" />
             <Header.Content>Open Campaigns</Header.Content>
           </Header>
+          <br />
           <Link route="/campaigns/new">
             <a>
               <Button
@@ -45,7 +46,6 @@ class CampaignIndex extends Component {
           </Link>
           {this.renderCampaigns()}
           <br />
-          <hr />
         </div>
       </Layout>
     );

@@ -1,18 +1,29 @@
 import React, { Component } from "react";
 import Layout from "../../../components/Layout";
-import { Header, Icon, Button, Table, Tab, Divider } from "semantic-ui-react";
-import { Link } from "../../../routes";
+import {
+  Header,
+  Icon,
+  Button,
+  Table,
+  Tab,
+  Divider,
+  Message,
+} from "semantic-ui-react";
+import { Router, Link } from "../../../routes";
 import Campaign from "../../../ethereum/campaign";
 import RequestRow from "../../../components/RequestRow";
 
 class RequestIndex extends Component {
+  state = {
+    errorMessage: "",
+  };
   static async getInitialProps(props) {
     const { address } = props.query;
     const campaign = Campaign(address);
     const requestCount = await campaign.methods.getRequestsCount().call();
     const approversCount = await campaign.methods.approversCount().call();
     const requests = await Promise.all(
-      Array(requestCount)
+      Array(parseInt(requestCount))
         .fill()
         .map((element, index) => {
           return campaign.methods.requests(index).call();
@@ -21,10 +32,23 @@ class RequestIndex extends Component {
     return { address, requests, requestCount, approversCount };
   }
 
+  reloadCallback = () => {
+    Router.replaceRoute(`/campaigns/${this.props.address}/requests`);
+  };
+  errorHandler = (error) => {
+    this.setState({ errorMessage: error.message });
+  };
+  cleanError = () => {
+    this.setState({ errorMessage: "" });
+  };
+
   renderRows() {
     return this.props.requests.map((request, index) => {
       return (
         <RequestRow
+          errorHandler={this.errorHandler}
+          callback={this.reloadCallback}
+          cleanError={this.cleanError}
           key={index}
           id={index}
           request={request}
@@ -40,11 +64,16 @@ class RequestIndex extends Component {
       <Layout>
         <Header as="h3">
           <Icon name="meh" />
-          <Header.Content>Pending Requests</Header.Content>
+          <Header.Content>Requests</Header.Content>
         </Header>
+        {this.state.errorMessage == "" ? null : (
+          <Message error content={this.state.errorMessage} header="Error" />
+        )}
         <Link route={`/campaigns/${this.props.address}/requests/new`}>
           <a>
-            <Button primary>New Request</Button>
+            <Button floated="right" style={{ marginBottom: 10 }} primary>
+              New Request
+            </Button>
           </a>
         </Link>
         <Table>
@@ -61,6 +90,7 @@ class RequestIndex extends Component {
           </Table.Header>
           <Table.Body>{this.renderRows()}</Table.Body>
         </Table>
+        <div>Found {this.props.requestCount} Requests</div>
       </Layout>
     );
   }

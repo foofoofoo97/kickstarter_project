@@ -16,7 +16,10 @@ const Layout = (props) => {
       <div>
         <Header />
         {props.children}
-        <h1>I am footer</h1>
+        <br />
+        <footer>
+          <h5 style={{ textAlign: "center" }}>CrowdCoin.com</h5>
+        </footer>
       </div>
     </Container>
   );
